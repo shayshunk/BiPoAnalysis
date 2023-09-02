@@ -214,7 +214,7 @@ int BiPoDeadSeg_timingStudy()
     double ft_end = ft_start + 12 * (t_end - t_start);
 
     int p_clust_counter = 0, f_clust_counter = 0, times_filled = 0;
-    int corr_counter = 0, acc_counter = 0, multPromptCounter = 0, multFarCounter = 0;
+    int corr_counter = 0, acc_counter = 0;
 
     // Beginning data reading loop
     int noEntries = ch->GetEntries();
@@ -265,6 +265,11 @@ int BiPoDeadSeg_timingStudy()
 
         for (int j = 0; j < multPrompt; ++j)
         {
+            int beta_seg = bp->pseg->at(j);
+            if (beta_seg >= 140 || beta_seg % 14 == 0 || (beta_seg + 1) % 14 == 0 || beta_seg == 25 || beta_seg == 26)
+            {
+                continue;
+            }
             if (bp->pmult_clust->at(j) != bp->pmult_clust_ioni->at(j))
             {
                 continue; // Throwing out clusters with recoils mixed in
@@ -274,13 +279,6 @@ int BiPoDeadSeg_timingStudy()
                 continue; // Optional beta energy cut
             }
             if (bp->pPSD->at(j) < lPpsd || bp->pPSD->at(j) > hPpsd)
-            {
-                continue;
-            }
-
-            int beta_seg = bp->pseg->at(j);
-
-            if (beta_seg >= 140 || beta_seg % 14 == 0 || (beta_seg + 1) % 14 == 0 || beta_seg == 25 || beta_seg == 26)
             {
                 continue;
             }
@@ -304,11 +302,8 @@ int BiPoDeadSeg_timingStudy()
 
             if (d > 550)
             {
-                multPromptCounter++;
                 continue;
             }
-            
-
             if (dz < -250.0 || dz > 250.0) //difference in position between delayed alpha and first beta candidate in cluster < 250 mm
                 continue;
     
@@ -406,8 +401,6 @@ int BiPoDeadSeg_timingStudy()
             {
                 continue;
             }
-            
-            multFarCounter++;
                 
             double betaZ = bp->fz->at(j);
             double alphaT = bp->at;
@@ -441,7 +434,7 @@ int BiPoDeadSeg_timingStudy()
             {
                 ++scale;
                 times_filled++;
-		        acc_counter++;
+                acc_counter++;
 
                 hf_z->Fill(dz, n2f);
 
@@ -506,7 +499,6 @@ int BiPoDeadSeg_timingStudy()
 
     cout << "Out of " << corr_counter << " correlated events, we had " << p_clust_counter << " events with multiple betas.\n";
     cout << "Out of " << acc_counter << " accidental events, we had " << f_clust_counter << " events with multiple betas.\n";
-    cout << "We went into the corr loop: " << multPromptCounter << " times and the acc loop: " << multFarCounter << " times.\n";
 
     double x_legend = 0.6;
     double y_legend = 0.77;

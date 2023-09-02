@@ -180,8 +180,6 @@ int main()
     double ft_start = 10 * tauBiPo;
     double ft_end = ft_start + 12 * (t_end - t_start);
 
-    int corCounter = 0, accCounter = 0;
-
     //----------------------------------------------------
     // Fill the data: histograms
     //----------------------------------------------------
@@ -214,7 +212,7 @@ int main()
         return -1;
     }
 
-    int countlines = 0, missing_files = 0, noTotalEntries = 0, multPromptCounter = 0, multFarCounter = 0;
+    int countlines = 0, missing_files = 0;
 
     while (file.good() && !file.eof())
     {
@@ -238,8 +236,6 @@ int main()
             Init(Th);
 
             long nEntries = Th->GetEntries();
-
-            noTotalEntries += nEntries;
 
             for (long i = 0; i < nEntries; i++)
             {
@@ -288,7 +284,7 @@ int main()
                     int alphaY = alphaSeg / 14;
                     int betaX = betaSeg % 14;
                     int betaY = betaSeg / 14;
-                    int betaZ = pz->at(j);
+                    double betaZ = pz->at(j);
 
                     if (!(abs(betaZ) < 1000))
                         continue;
@@ -301,21 +297,15 @@ int main()
 
                     if (d > 550) //discard largely displaced prompt and delayed
                     {
-                        multPromptCounter++;
                         continue;
                     }
-
-
                     if (dz < -250.0 || dz > 250.0) //difference in position between delayed alpha and first beta candidate in cluster < 250 mm
                         continue;
 
                     double dt = alphaTime - pt->at(j);
 
-
                     if (dt > t_start && dt < t_end) //Time difference between the prompt beta and delayed alpha
                     {
-                        corCounter++;
-
                         for (int ivar = 0; ivar != vars.size(); ++ivar)
                         {
                             int m = 0;
@@ -389,13 +379,12 @@ int main()
                     {
                         continue;
                     }
-                    multFarCounter++;
 
                     int alphaX = alphaSeg % 14;
                     int alphaY = alphaSeg / 14;
                     int betaX = betaSeg % 14;
                     int betaY = betaSeg / 14;
-                    int betaZ = fz->at(j);
+                    double betaZ = fz->at(j);
 
                     if (!(abs(betaZ) < 1000))
                     {
@@ -412,7 +401,6 @@ int main()
                     {
                         continue;
                     }
-
                     if (dz < -250.0 || dz > 250.0) //difference in position between delayed alpha and first beta candidate in cluster < 250 mm
                     {
                         continue;
@@ -422,7 +410,6 @@ int main()
 
                     if (dt > ft_start && dt < ft_end) //Time difference between the prompt beta and delayed alpha
                     {
-                        accCounter++;
 
                         for (int ivar = 0; ivar < vars.size(); ++ivar)
                         {
@@ -488,9 +475,6 @@ int main()
     f_output->Close();
 
     cout << "Program complete with " << missing_files << " missing files!\n";
-    cout << "Number of entries: " << noTotalEntries << "\n";
-    cout << "We had " << corCounter << " correlated events and " << accCounter << " accidental events.\n";
-    cout << "We went into the corr loop: " << multPromptCounter << " times and the acc loop: " << multFarCounter << " times.\n";
 
     return 0;
 }
