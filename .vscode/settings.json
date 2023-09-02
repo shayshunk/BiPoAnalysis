@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "BiPoDeadSeg_RxOff.C": "cpp",
+        "BiPoDeadSeg_RxOff copy.C": "cpp",
+        "BiPoDeadSeg_timingStudy.C": "cpp",
+        "BiPoDeadSeg_timingStudy copy.C": "cpp",
+        "BiPoDeadSeg_faster.C": "cpp",
+        "iosfwd": "cpp",
+        "makeBiPoClassFromRunlist.C": "cpp",
+        "BP.C": "cpp",
+        "iostream": "cpp"
+    }
+}

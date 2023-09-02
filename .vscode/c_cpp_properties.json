@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "~/Documents/root/",
+                "~/Documents/root/include/",
+                "~/Documents/root/include/ROOT/",
+                "~/Documents/GEANT4/",
+                "~/Documents/GEANT4/include/",
+                "~/Documents/GEANT4/include/Geant4/"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "/home/shay/Documents/root/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

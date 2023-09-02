@@ -16,7 +16,7 @@ def replace_line(filename, text):
             file.write(line)
 
 
-filename = "2019Xlist_copy.txt"
+filename = "2019Xlist.txt"
 text = " 1"
 
 replace_line(filename, text)
