@@ -95,7 +95,7 @@ bool checkNeighbor(vector<int>& detectorConfig, int segNo, char dir)
 
 }
 
-int BiPoDeadSeg_timingStudy() 
+int BiPoNoHistogram() 
 {
     gErrorIgnoreLevel = kError;
 
@@ -129,7 +129,7 @@ int BiPoDeadSeg_timingStudy()
     gStyle->SetOptStat(0);
     gStyle->SetOptFit(1111);
 
-    TH1D *hp_x = new TH1D("hp_x", "Alpha-Beta X Position Difference", 301, -150, 150);
+    /*TH1D *hp_x = new TH1D("hp_x", "Alpha-Beta X Position Difference", 301, -150, 150);
     hp_x->SetLineColor(kBlue);
     hp_x->SetLineWidth(2);
 
@@ -204,6 +204,18 @@ int BiPoDeadSeg_timingStudy()
     TH1D *h_alpha = new TH1D("h_alpha", "Alpha Z Position", 250, -1000, 1000);
     h_alpha->SetLineColor(kMagenta);
     h_alpha->SetLineWidth(2);
+    */
+
+    double corXNeg = 0, corXNeut = 0, corXPos = 0;
+    double accXNeg = 0, accXNeut = 0, accXPos = 0;
+    double corYNeg = 0, corYNeut = 0, corYPos = 0;
+    double accYNeg = 0, accYNeut = 0, accYPos = 0;
+    double corZNeg = 0, corZNeut = 0, corZPos = 0;
+    double accZNeg = 0, accZNeut = 0, accZPos = 0;
+    double corXNpp = 0, corXNpm = 0, corXNmm = 0;
+    double accXNpp = 0, accXNpm = 0, accXNmm = 0;
+    double corYNpp = 0, corYNpm = 0, corYNmm = 0;
+    double accYNpp = 0, accYNpm = 0, accYNmm = 0;
 
     //------------------------------
     // Setting boundary cuts
@@ -256,7 +268,7 @@ int BiPoDeadSeg_timingStudy()
         }
 
         int alpha_seg = bp->aseg;
-        if (alpha_seg >= 140 || alpha_seg < 77 || alpha_seg % 14 == 0 || (alpha_seg + 1) % 14 == 0 || alpha_seg == 25 || alpha_seg == 26)
+        if (alpha_seg >= 140|| alpha_seg % 14 == 0 || (alpha_seg + 1) % 14 == 0 || alpha_seg == 25 || alpha_seg == 26)
         {
             continue;
         }
@@ -266,7 +278,7 @@ int BiPoDeadSeg_timingStudy()
         for (int j = 0; j < multPrompt; ++j)
         {
             int beta_seg = bp->pseg->at(j);
-            if (beta_seg >= 140 || beta_seg < 77 || beta_seg % 14 == 0 || (beta_seg + 1) % 14 == 0 || beta_seg == 25 || beta_seg == 26)
+            if (beta_seg >= 140 || beta_seg % 14 == 0 || (beta_seg + 1) % 14 == 0 || beta_seg == 25 || beta_seg == 26)
             {
                 continue;
             }
@@ -316,34 +328,30 @@ int BiPoDeadSeg_timingStudy()
 
                 if (beta_seg == alpha_seg + 1)
                 {
-                    hp_x->Fill(-145.0);
+                    corXNeg++;
                 }
                 if (beta_seg == alpha_seg - 1)
                 {
-                    hp_x->Fill(145.0);
+                    corXPos++;
                 }
                 if (beta_seg == alpha_seg + 14)
                 {
-                    hp_y->Fill(-145.0);
+                    corYNeg++;
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
-                    hp_y->Fill(145.0);
-                }
-                if (beta_seg == alpha_seg)
-                {
-                    hp_x->Fill(0);
-                    hp_y->Fill(0);
+                    corYPos++;
                 }
                 
                 ++scale;
                 times_filled++;
 		        corr_counter++;
 
-                hp_z->Fill(dz);
-
-                if (bp->aseg == bp->pseg->at(j))
+                if (beta_seg == alpha_seg)
                 {
+                    corXNeut++;
+                    corYNeut++;
+
                     bool xposDir = false, xnegDir = false;
                     bool yposDir = false, ynegDir = false;
 
@@ -354,21 +362,21 @@ int BiPoDeadSeg_timingStudy()
 
                     if (xposDir && !xnegDir)
                     {
-                        hpx_count->Fill(145.0);
+                        corXNpp++;
                     }
                     else if (!xposDir && xnegDir)
-                        hpx_count->Fill(-145.0);
+                        corXNmm++;
                     else if (xposDir && xnegDir)
-                        hpx_count->Fill(0.0);
+                        corXNpm++;
                     
                     if (yposDir && !ynegDir)
-                        hpy_count->Fill(145.0);
+                        corYNpp++;
                     else if (!yposDir && ynegDir)
                     {
-                        hpy_count->Fill(-145.0);
+                        corYNmm++;
                     }
                     else if (yposDir && ynegDir)
-                        hpy_count->Fill(0.0);
+                        corYNpm++;
                 }
             }
         }
@@ -378,7 +386,6 @@ int BiPoDeadSeg_timingStudy()
 
         times_filled = 0;
 
-        hp_alpha->Fill(alphaZ, scale);
         scale = 0;
 
         for (int j = 0; j < multFar; ++j)
@@ -436,32 +443,28 @@ int BiPoDeadSeg_timingStudy()
                 times_filled++;
                 acc_counter++;
 
-                hf_z->Fill(dz, n2f);
-
                 if (beta_seg == alpha_seg + 1)
                 {
-                    hf_x->Fill(-145.0, n2f);
+                    accXNeg++;
                 }
                 if (beta_seg == alpha_seg - 1)
                 {
-                    hf_x->Fill(145.0, n2f);
+                    accXPos++;
                 }
                 if (beta_seg == alpha_seg + 14)
                 {
-                    hf_y->Fill(-145.0, n2f);
+                    accYNeg++;
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
-                    hf_y->Fill(145.0, n2f);
-                }
-                if (beta_seg == alpha_seg)
-                {
-                    hf_x->Fill(0);
-                    hf_y->Fill(0);
+                    accYPos++;
                 }
 
-                if (bp->aseg == bp->fseg->at(j))
+                if (beta_seg == alpha_seg)
                 {
+                    accXNeut++;
+                    accYNeut++;
+
                     bool xposDir = false, xnegDir = false;
                     bool yposDir = false, ynegDir = false;
 
@@ -472,29 +475,27 @@ int BiPoDeadSeg_timingStudy()
 
                     if (xposDir && !xnegDir)
                     {
-                        hfx_count->Fill(145.0, n2f);
+                        accXNpp++;
                     }
                     else if (!xposDir && xnegDir)
-                        hfx_count->Fill(-145.0, n2f);
+                        accXNmm++;
                     else if (xposDir && xnegDir)
-                        hfx_count->Fill(0.0, n2f);
+                        accXNpm++;
                     
                     if (yposDir && !ynegDir)
-                        hfy_count->Fill(145.0, n2f);
+                        accYNpp++;
                     else if (!yposDir && ynegDir)
                     {
-                        hfy_count->Fill(-145.0, n2f);
+                        accYNmm++;
                     }
                     else if (yposDir && ynegDir)
-                        hfy_count->Fill(0.0, n2f);
+                        accYNpm++;
                 }
             }
         }
 
         if (times_filled > 1)
             f_clust_counter++;
-
-        hf_alpha->Fill(alphaZ, n2f*scale);
     }
 
     cout << "Out of " << corr_counter << " correlated events, we had " << p_clust_counter << " events with multiple betas.\n";
@@ -503,23 +504,32 @@ int BiPoDeadSeg_timingStudy()
     double x_legend = 0.6;
     double y_legend = 0.77;
 
-    hx = (TH1D*)hp_x->Clone("hx");
-    hx->Add(hf_x, -1);
+    accXNeg = accXNeg / 12;
+    accXPos = accXPos / 12;
+    accYNeg = accYNeg / 12;
+    accYPos = accYPos / 12;
+    accXNeut = accXNeut / 12;
+    accYNeut = accYNeut / 12;
+    accXNpp = accXNpp / 12;
+    accXNpm = accXNpm / 12;
+    accXNmm = accXNmm / 12;
+    accYNpp = accYNpp / 12;
+    accYNmm = accYNmm / 12;
+    accYNpm = accYNpm / 12;
 
-    hy = (TH1D*)hp_y->Clone("hy");
-    hy->Add(hf_y, -1);
-
-    hz = (TH1D*)hp_z->Clone("hz");
-    hz->Add(hf_z, -1);
-
-    hx_count = (TH1D*)hpx_count->Clone("hx_count");
-    hx_count->Add(hfx_count, -1);
-
-    hy_count = (TH1D*)hpy_count->Clone("hy_count");
-    hy_count->Add(hfy_count, -1);
-
-    h_alpha = (TH1D*)hp_alpha->Clone("h_alpha");
-    h_alpha->Add(hf_alpha, -1);
+    // Accidental subtraction
+    corXNeg -= accXNeg;
+    corXPos -= accXPos;
+    corYNeg -= accYNeg;
+    corYPos -= accYPos;
+    corXNeut -= accXNeut;
+    corYNeut -= accYNeut;
+    corXNpp -= accXNpp;
+    corXNpm -= accXNpm;
+    corXNmm -= accXNmm;
+    corYNpp -= accYNpp;
+    corYNpm -= accYNpm;
+    corYNmm -= accYNmm;
 
     // Doing x correction
 
@@ -530,19 +540,19 @@ int BiPoDeadSeg_timingStudy()
     double x1Err, x2Err, x3Err, x4Err, x5Err;
     double rPlusErr, rMinusErr;
 
-    np = hx->GetBinContent(3);
-    npp = hx_count->GetBinContent(3);
-    nm = hx->GetBinContent(1);
-    nmm = hx_count->GetBinContent(1);
-    n0 = hx->GetBinContent(2);
-    npm = hx_count->GetBinContent(2);
+    np = corXPos;
+    npp = corXNpp;
+    nm = corXNeg;
+    nmm = corXNmm;
+    n0 = corXNeut;
+    npm = corXNpm;
 
-    npErr = hx->GetBinError(3);
-    nppErr = hx_count->GetBinError(3);
-    nmErr = hx->GetBinError(1);
-    nmmErr = hx_count->GetBinError(1);
-    n0Err = hx->GetBinError(2);
-    npmErr = hx_count->GetBinError(2);
+    npErr = sqrt(np);
+    nppErr = sqrt(npp);
+    nmErr = sqrt(nm);
+    nmmErr = sqrt(nmm);
+    n0Err = sqrt(n0);
+    npmErr = sqrt(npm);
     
     x1 = np;
     x2 = npp + npm;
@@ -575,20 +585,24 @@ int BiPoDeadSeg_timingStudy()
     cout << "N plus minus: " << npm << "\n";
     cout << "N 0: " << n0 << "\n";
 
-    // Doing y correction
-    np = hy->GetBinContent(3);
-    npp = hy_count->GetBinContent(3);
-    nm = hy->GetBinContent(1);
-    nmm = hy_count->GetBinContent(1);
-    n0 = hy->GetBinContent(2);
-    npm = hy_count->GetBinContent(2);
+    double mean = (-145.7 * nm + 145.7 * np) / (np + n0 + nm);
 
-    npErr = hy->GetBinError(3);
-    nppErr = hy_count->GetBinError(3);
-    nmErr = hy->GetBinError(1);
-    nmmErr = hy_count->GetBinError(1);
-    n0Err = hy->GetBinError(2);
-    npmErr = hy_count->GetBinError(2);
+    cout << "The regular X mean is: " << mean << "\n";
+
+    // Doing y correction
+    np = corYPos;
+    npp = corYNpp;
+    nm = corYNeg;
+    nmm = corYNmm;
+    n0 = corYNeut;
+    npm = corYNpm;
+
+    npErr = sqrt(np);
+    nppErr = sqrt(npp);
+    nmErr = sqrt(nm);
+    nmmErr = sqrt(nmm);
+    n0Err = sqrt(n0);
+    npmErr = sqrt(npm);
     
     x1 = np;
     x2 = npp + npm;
@@ -621,6 +635,10 @@ int BiPoDeadSeg_timingStudy()
     cout << "N plus minus: " << npm << "\n";
     cout << "N 0: " << n0 << "\n";
 
+    mean = (-145.7 * nm + 145.7 * np) / (np + n0 + nm);
+
+    cout << "The regular Y mean is: " << mean << "\n";
+    /*
     TCanvas *c = new TCanvas("c", "c", 0, 0, 1600, 1000);
     c->Divide(2, 1);
 
@@ -784,6 +802,6 @@ int BiPoDeadSeg_timingStudy()
     leg3->Draw();        
 
     c3->SaveAs("Z_AlphaBeta_RxOn.png");    
-
+    */
     return 0;
 }

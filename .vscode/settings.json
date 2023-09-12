@@ -8,6 +8,9 @@
         "iosfwd": "cpp",
         "makeBiPoClassFromRunlist.C": "cpp",
         "BP.C": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "*.inc": "cpp",
+        "array": "cpp",
+        "string_view": "cpp"
     }
 }
