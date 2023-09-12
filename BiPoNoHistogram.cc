@@ -31,6 +31,7 @@
 
 using std::cout;
 using std::vector;
+using std::array;
 
 void fillDetectorConfig(vector<int>& detectorConfig){
     // Filling values based on different periods
@@ -129,93 +130,17 @@ int BiPoNoHistogram()
     gStyle->SetOptStat(0);
     gStyle->SetOptFit(1111);
 
-    /*TH1D *hp_x = new TH1D("hp_x", "Alpha-Beta X Position Difference", 301, -150, 150);
-    hp_x->SetLineColor(kBlue);
-    hp_x->SetLineWidth(2);
+    array<array<double, 6>, 3> correlated;
+    array<array<double, 6>, 3> accidental;
 
-    TH1D *hp_y = new TH1D("hp_y", "Alpha-Beta Y Position Difference", 301, -150, 150);
-    hp_y->SetLineColor(kBlue);
-    hp_y->SetLineWidth(2);
-
-    TH1D *hp_z = new TH1D("hp_z", "Alpha-Beta Z Position Difference", 501, -250, 250);
-    hp_z->SetLineColor(kBlue);
-    hp_z->SetLineWidth(2);
-    hp_z->Sumw2();
-
-    TH1D *hf_x = new TH1D("hf_x", "Alpha-Beta X Position Difference (Accidental)", 301, -150, 150);
-    hf_x->SetLineColor(kRed);
-    hf_x->SetLineWidth(2);
-
-    TH1D *hf_y = new TH1D("hf_y", "Alpha-Beta Y Position Difference (Accidental)", 301, -150, 150);
-    hf_y->SetLineColor(kRed);
-    hf_y->SetLineWidth(2);
-
-    TH1D *hf_z = new TH1D("hf_z", "Alpha-Beta Z Position Difference (Accidental)", 501, -250, 250);
-    hf_z->SetLineColor(kRed);
-    hf_z->SetLineWidth(2);
-    hf_z->Sumw2();
-
-    TH1D *hx = new TH1D("hx", "Alpha-Beta X Position Difference (Acc Subtr)", 301, -150, 150);
-    hx->SetLineColor(kMagenta);
-    hx->SetLineWidth(2);
-
-    TH1D *hy = new TH1D("hy", "Alpha-Beta Y Position Difference (Acc Subtr)", 301, -150, 150);
-    hy->SetLineColor(kMagenta);
-    hy->SetLineWidth(2);
-
-    TH1D *hz = new TH1D("hz", "Alpha-Beta Z Position Difference (Acc Subtr)", 501, -250, 250);
-    hz->SetLineColor(kMagenta);
-    hz->SetLineWidth(2);
-
-    TH1D *hpx_count = new TH1D("hpx_counter", "Alpha-Beta X Position Difference (Acc Subtr)", 3, -150, 150);
-    hpx_count->SetLineColor(kMagenta);
-    hpx_count->SetLineWidth(2);
-
-    TH1D *hpy_count = new TH1D("hpy_counter", "Alpha-Beta Y Position Difference (Acc Subtr)", 3, -150, 150);
-    hpy_count->SetLineColor(kMagenta);
-    hpy_count->SetLineWidth(2);
-
-    TH1D *hfx_count = new TH1D("hfx_counter", "Alpha-Beta x Position Difference (Acc Subtr)", 3, -150, 150);
-    hfx_count->SetLineColor(kMagenta);
-    hfx_count->SetLineWidth(2);
-    hfx_count->Sumw2();
-
-    TH1D *hfy_count = new TH1D("hfy_counter", "Alpha-Beta Y Position Difference (Acc Subtr)", 3, -150, 150);
-    hfy_count->SetLineColor(kMagenta);
-    hfy_count->SetLineWidth(2);
-    hfx_count->Sumw2();
-
-    TH1D *hx_count = new TH1D("hx_counter", "Alpha-Beta X Position Difference (Acc Subtr)", 3, -150, 150);
-    hpx_count->SetLineColor(kMagenta);
-    hpx_count->SetLineWidth(2);
-
-    TH1D *hy_count = new TH1D("hy_counter", "Alpha-Beta Y Position Difference (Acc Subtr)", 3, -150, 150);
-    hpy_count->SetLineColor(kMagenta);
-    hpy_count->SetLineWidth(2);
-
-    TH1D *hp_alpha = new TH1D("hp_alpha", "Alpha Z Position", 250, -1000, 1000);
-    hp_alpha->SetLineColor(kBlue);
-    hp_alpha->SetLineWidth(2);
-
-    TH1D *hf_alpha = new TH1D("hf_alpha", "Alpha Z Position acc", 250, -1000, 1000);
-    hf_alpha->SetLineColor(kRed);
-    hf_alpha->SetLineWidth(2);
-
-    TH1D *h_alpha = new TH1D("h_alpha", "Alpha Z Position", 250, -1000, 1000);
-    h_alpha->SetLineColor(kMagenta);
-    h_alpha->SetLineWidth(2);
-    */
-
-    double corXNeg = 0, corXNeut = 0, corXPos = 0;
-    double accXNeg = 0, accXNeut = 0, accXPos = 0;
-    double corYNeg = 0, corYNeut = 0, corYPos = 0;
-    double accYNeg = 0, accYNeut = 0, accYPos = 0;
-    double corZNeg = 0, corZNeut = 0, corZPos = 0;
-    double accZNeg = 0, accZNeut = 0, accZPos = 0;
-    double corXNpp = 0, corXNpm = 0, corXNmm = 0;
-    double accXNpp = 0, accXNpm = 0, accXNmm = 0;
-    double corYNpp = 0, corYNpm = 0, corYNmm = 0;
-    double accYNpp = 0, accYNpm = 0, accYNmm = 0;
+    for (int i = 0; i < correlated.size(); i++)
+    {
+        for (int j = 0; j < correlated[i].size(); j++)
+        {
+            correlated[i].at(j) = 0;
+            accidental[i].at(j) = 0;
+        }
+    }
 
     //------------------------------
     // Setting boundary cuts
@@ -326,21 +251,21 @@ int BiPoNoHistogram()
             if (dt > t_start && dt < t_end)
             {
 
-                if (beta_seg == alpha_seg + 1)
-                {
-                    corXNeg++;
-                }
                 if (beta_seg == alpha_seg - 1)
                 {
-                    corXPos++;
+                    correlated[0].at(0)++;
                 }
-                if (beta_seg == alpha_seg + 14)
+                else if (beta_seg == alpha_seg + 1)
                 {
-                    corYNeg++;
+                    correlated[0].at(1)++;
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
-                    corYPos++;
+                    correlated[1].at(0)++;
+                }
+                else if (beta_seg == alpha_seg + 14)
+                {
+                    correlated[1].at(1)++;
                 }
                 
                 ++scale;
@@ -349,8 +274,8 @@ int BiPoNoHistogram()
 
                 if (beta_seg == alpha_seg)
                 {
-                    corXNeut++;
-                    corYNeut++;
+                    correlated[0].at(2)++;
+                    correlated[1].at(2)++;
 
                     bool xposDir = false, xnegDir = false;
                     bool yposDir = false, ynegDir = false;
@@ -362,21 +287,21 @@ int BiPoNoHistogram()
 
                     if (xposDir && !xnegDir)
                     {
-                        corXNpp++;
+                        correlated[0].at(3)++;
                     }
                     else if (!xposDir && xnegDir)
-                        corXNmm++;
+                        correlated[0].at(4)++;
                     else if (xposDir && xnegDir)
-                        corXNpm++;
+                        correlated[0].at(5)++;
                     
                     if (yposDir && !ynegDir)
-                        corYNpp++;
+                        correlated[1].at(3)++;
                     else if (!yposDir && ynegDir)
                     {
-                        corYNmm++;
+                        correlated[1].at(4)++;
                     }
                     else if (yposDir && ynegDir)
-                        corYNpm++;
+                        correlated[1].at(5)++;
                 }
             }
         }
@@ -443,27 +368,27 @@ int BiPoNoHistogram()
                 times_filled++;
                 acc_counter++;
 
-                if (beta_seg == alpha_seg + 1)
-                {
-                    accXNeg++;
-                }
                 if (beta_seg == alpha_seg - 1)
                 {
-                    accXPos++;
+                    accidental[0].at(0)++;
                 }
-                if (beta_seg == alpha_seg + 14)
+                else if (beta_seg == alpha_seg + 1)
                 {
-                    accYNeg++;
+                    accidental[0].at(1)++;
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
-                    accYPos++;
+                    accidental[1].at(0)++;
+                }
+                else if (beta_seg == alpha_seg + 14)
+                {
+                    accidental[1].at(1)++;
                 }
 
                 if (beta_seg == alpha_seg)
                 {
-                    accXNeut++;
-                    accYNeut++;
+                    accidental[0].at(2)++;
+                    accidental[1].at(2)++;
 
                     bool xposDir = false, xnegDir = false;
                     bool yposDir = false, ynegDir = false;
@@ -475,21 +400,21 @@ int BiPoNoHistogram()
 
                     if (xposDir && !xnegDir)
                     {
-                        accXNpp++;
+                        accidental[0].at(3)++;
                     }
                     else if (!xposDir && xnegDir)
-                        accXNmm++;
+                        accidental[0].at(4)++;
                     else if (xposDir && xnegDir)
-                        accXNpm++;
+                        accidental[0].at(5)++;
                     
                     if (yposDir && !ynegDir)
-                        accYNpp++;
+                        accidental[1].at(3)++;
                     else if (!yposDir && ynegDir)
                     {
-                        accYNmm++;
+                        accidental[1].at(4)++;
                     }
                     else if (yposDir && ynegDir)
-                        accYNpm++;
+                        accidental[1].at(5)++;
                 }
             }
         }
@@ -504,32 +429,22 @@ int BiPoNoHistogram()
     double x_legend = 0.6;
     double y_legend = 0.77;
 
-    accXNeg = accXNeg / 12;
-    accXPos = accXPos / 12;
-    accYNeg = accYNeg / 12;
-    accYPos = accYPos / 12;
-    accXNeut = accXNeut / 12;
-    accYNeut = accYNeut / 12;
-    accXNpp = accXNpp / 12;
-    accXNpm = accXNpm / 12;
-    accXNmm = accXNmm / 12;
-    accYNpp = accYNpp / 12;
-    accYNmm = accYNmm / 12;
-    accYNpm = accYNpm / 12;
+    for (int i = 0; i < correlated.size(); i++)
+    {
+        for (int j = 0; j < correlated[i].size(); j++)
+        {
+            accidental[i].at(j) = accidental[i].at(j) / 12;
+        }
+    }
 
     // Accidental subtraction
-    corXNeg -= accXNeg;
-    corXPos -= accXPos;
-    corYNeg -= accYNeg;
-    corYPos -= accYPos;
-    corXNeut -= accXNeut;
-    corYNeut -= accYNeut;
-    corXNpp -= accXNpp;
-    corXNpm -= accXNpm;
-    corXNmm -= accXNmm;
-    corYNpp -= accYNpp;
-    corYNpm -= accYNpm;
-    corYNmm -= accYNmm;
+    for (int i = 0; i < correlated.size(); i++)
+    {
+        for (int j = 0; j < correlated[i].size(); j++)
+        {
+            correlated[i].at(j) -= accidental[i].at(j);
+        }
+    }
 
     // Doing x correction
 
@@ -540,12 +455,12 @@ int BiPoNoHistogram()
     double x1Err, x2Err, x3Err, x4Err, x5Err;
     double rPlusErr, rMinusErr;
 
-    np = corXPos;
-    npp = corXNpp;
-    nm = corXNeg;
-    nmm = corXNmm;
-    n0 = corXNeut;
-    npm = corXNpm;
+    np = correlated[0].at(0);
+    nm = correlated[0].at(1);
+    n0 = correlated[0].at(2);
+    npp = correlated[0].at(3);
+    nmm = correlated[0].at(4);
+    npm = correlated[0].at(5);
 
     npErr = sqrt(np);
     nppErr = sqrt(npp);
@@ -590,12 +505,12 @@ int BiPoNoHistogram()
     cout << "The regular X mean is: " << mean << "\n";
 
     // Doing y correction
-    np = corYPos;
-    npp = corYNpp;
-    nm = corYNeg;
-    nmm = corYNmm;
-    n0 = corYNeut;
-    npm = corYNpm;
+    np = correlated[1].at(0);
+    nm = correlated[1].at(1);
+    n0 = correlated[1].at(2);
+    npp = correlated[1].at(3);
+    nmm = correlated[1].at(4);
+    npm = correlated[1].at(5);
 
     npErr = sqrt(np);
     nppErr = sqrt(npp);
@@ -638,170 +553,6 @@ int BiPoNoHistogram()
     mean = (-145.7 * nm + 145.7 * np) / (np + n0 + nm);
 
     cout << "The regular Y mean is: " << mean << "\n";
-    /*
-    TCanvas *c = new TCanvas("c", "c", 0, 0, 1600, 1000);
-    c->Divide(2, 1);
-
-    c->cd(1);
-
-    hp_x->Draw("hist");
-    hp_x->SetMinimum(0);
-    hp_x->SetMaximum(3500000);
-
-    hf_x->Draw("hist same");
-
-    hp_x->GetXaxis()->SetTitle("Beta/Alpha Displacement (mm)");
-    hp_x->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
-
-    c->cd(2);
-
-    hx->Draw("hist");
-    hx->SetMinimum(0);
-    hx->SetMaximum(3500000);
-
-    hx->GetXaxis()->SetTitle("Beta/Alpha Displacement (mm)");
-    hx->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
     
-    TLegend *leg = new TLegend( x_legend, y_legend, x_legend + 0.25, y_legend + 0.08 );
-    leg->SetBorderSize(1);
-    leg->SetFillColor(0);
-    leg->SetFillStyle(0);
-    leg->SetTextFont(62);
-    leg->SetTextSize(0.02);
-    
-    TLegendEntry* l11 = leg->AddEntry( (TObject*)0, Form("Mean = %.2f", hx->GetMean()), "" );
-    l11->SetTextColor(kBlack);
-    TLegendEntry* l12 = leg->AddEntry( (TObject*)0, Form("SEM = %.2f", (hx->GetStdDev())/sqrt(hx->GetEntries())), "" );
-    l12->SetTextColor(kBlack);
-
-    leg->Draw();
-
-    c->SaveAs("X_AlphaBeta_RxOn.png");        
-
-    TCanvas *c1 = new TCanvas("c1", "c1", 0, 0, 1600, 1000);
-    c1->Divide(2, 1);
-
-    c1->cd(1);
-
-    hp_y->Draw("hist");
-    hp_y->SetMinimum(0);
-    hp_y->SetMaximum(3500000);
-
-    hf_y->Draw("hist same");
-
-    hp_y->GetXaxis()->SetTitle("Beta/Alpha Displacement (mm)");
-    hp_y->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
-
-    c1->cd(2);
-
-    hy->Draw("hist");
-    hy->SetMinimum(0);
-    hy->SetMaximum(3500000);
-
-    hy->GetXaxis()->SetTitle("Beta/Alpha Displacement (mm)");
-    hy->GetYaxis()->SetTitle("Counts");
-    gPad->SetBottomMargin(0.15);
-    
-    TLegend *leg1 = new TLegend( x_legend, y_legend, x_legend + 0.25, y_legend + 0.08 );
-    leg1->SetBorderSize(1);
-    leg1->SetFillColor(0);
-    leg1->SetFillStyle(0);
-    leg1->SetTextFont(62);
-    leg1->SetTextSize(0.02);
-    
-    TLegendEntry* l111 = leg1->AddEntry( (TObject*)0, Form("Mean = %.2f", hy->GetMean()), "" );
-    l111->SetTextColor(kBlack);
-    TLegendEntry* l121 = leg1->AddEntry( (TObject*)0, Form("SEM = %.2f", (hy->GetStdDev())/sqrt(hy->GetEntries())), "" );
-    l121->SetTextColor(kBlack);
-
-    leg1->Draw();
-
-    c1->SaveAs("Y_AlphaBeta_RxOn.png");           
-
-    TCanvas *c2 = new TCanvas("c2", "c2", 0, 0, 1600, 1000);
-    c2->Divide(2, 1);
-
-    c2->cd(1);
-
-    hp_alpha->Draw("hist");
-    hf_alpha->Draw("hist same");
-    hp_alpha->GetXaxis()->SetTitle("(mm)");
-    hp_alpha->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
-
-    c2->cd(2);
-
-    h_alpha->Draw("hist");
-    h_alpha->GetXaxis()->SetTitle("(mm)");
-    h_alpha->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
-
-    TLegend *leg2 = new TLegend( x_legend, y_legend, x_legend + 0.25, y_legend + 0.08 );
-    leg2->SetBorderSize(1);
-    leg2->SetFillColor(0);
-    leg2->SetFillStyle(0);
-    leg2->SetTextFont(62);
-    leg2->SetTextSize(0.02);
-    
-    TLegendEntry* l112 = leg2->AddEntry( (TObject*)0, Form("Mean = %.2f", h_alpha->GetMean()), "" );
-    l112->SetTextColor(kBlack);
-    TLegendEntry* l122 = leg2->AddEntry( (TObject*)0, Form("SEM = %.2f", (h_alpha->GetStdDev()/sqrt(h_alpha->GetEntries()))), "" );
-    l122->SetTextColor(kBlack);
-
-    leg2->Draw();        
-
-    c2->SaveAs("Z_Alpha_RxOn.png");
-
-    TCanvas *c3 = new TCanvas("c3", "c3", 0, 0, 1600, 1000);
-    c3->Divide(2, 1);
-
-    c3->cd(1);
-
-    hp_z->Draw("hist");
-    hf_z->Draw("hist same");
-    hp_z->GetXaxis()->SetTitle("(mm)");
-    hp_z->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
-
-    c3->cd(2);
-
-    hz->Draw("hist");
-    hz->GetXaxis()->SetTitle("(mm)");
-    hz->GetYaxis()->SetTitle("Counts");
-    gPad->SetRightMargin(0.09);
-    gPad->SetLeftMargin(0.15);
-    gPad->SetBottomMargin(0.15);
-
-    TLegend *leg3 = new TLegend( x_legend, y_legend, x_legend + 0.25, y_legend + 0.08 );
-    leg3->SetBorderSize(1);
-    leg3->SetFillColor(0);
-    leg3->SetFillStyle(0);
-    leg3->SetTextFont(62);
-    leg3->SetTextSize(0.02);
-    
-    TLegendEntry* l113 = leg3->AddEntry( (TObject*)0, Form("Mean = %.2f", hz->GetMean()), "" );
-    l113->SetTextColor(kBlack);
-    TLegendEntry* l123 = leg3->AddEntry( (TObject*)0, Form("SEM = %.2f", (hz->GetStdDev()/sqrt(hz->GetEntries()))), "" );
-    l123->SetTextColor(kBlack);
-
-    leg3->Draw();        
-
-    c3->SaveAs("Z_AlphaBeta_RxOn.png");    
-    */
     return 0;
 }
