@@ -2,9 +2,6 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include "TH1D.h"
-#include "TDatime.h"
-#include "TVectorD.h"
 #include "TChain.h"
 #include "TSystem.h"
 #include "TChainElement.h"
@@ -16,14 +13,9 @@
 #include "TLegendEntry.h"
 #include "TGraphErrors.h"
 #include "TCanvas.h"
-#include "TF1.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "THStack.h"
-#include "TPaveText.h"
-#include "TPaveStats.h"
+#include "TError.h"
 #include "BP.C"
 #include "PROSPECT_Style.cc"
 #include "vector"
@@ -123,24 +115,14 @@ int BiPoNoHistogram()
 
     // Initilizaing Data Structure
     BP *bp = new BP();
-
     TChain *ch = bp->chain;
 
     // Setting up histograms and styles
     gStyle->SetOptStat(0);
     gStyle->SetOptFit(1111);
 
-    array<array<double, 6>, 3> correlated;
-    array<array<double, 6>, 3> accidental;
-
-    for (int i = 0; i < correlated.size(); i++)
-    {
-        for (int j = 0; j < correlated[i].size(); j++)
-        {
-            correlated[i].at(j) = 0;
-            accidental[i].at(j) = 0;
-        }
-    }
+    array<array<double, 6>, 2> correlated = {0};
+    array<array<double, 6>, 2> accidental = {0};
 
     //------------------------------
     // Setting boundary cuts
@@ -429,7 +411,7 @@ int BiPoNoHistogram()
     double x_legend = 0.6;
     double y_legend = 0.77;
 
-    for (int i = 0; i < correlated.size(); i++)
+    for (int i = 0; i < 2; i++)
     {
         for (int j = 0; j < correlated[i].size(); j++)
         {
@@ -500,7 +482,7 @@ int BiPoNoHistogram()
     cout << "N plus minus: " << npm << "\n";
     cout << "N 0: " << n0 << "\n";
 
-    double mean = (-145.7 * nm + 145.7 * np) / (np + n0 + nm);
+    double mean = (-D * nm + D * np) / (np + n0 + nm);
 
     cout << "The regular X mean is: " << mean << "\n";
 
@@ -550,7 +532,7 @@ int BiPoNoHistogram()
     cout << "N plus minus: " << npm << "\n";
     cout << "N 0: " << n0 << "\n";
 
-    mean = (-145.7 * nm + 145.7 * np) / (np + n0 + nm);
+    mean = (-D * nm + D * np) / (np + n0 + nm);
 
     cout << "The regular Y mean is: " << mean << "\n";
     
