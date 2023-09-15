@@ -24,7 +24,7 @@
 #include "THStack.h"
 #include "TPaveText.h"
 #include "TPaveStats.h"
-#include "BPsim.C"
+#include "BP.C"
 #include "PROSPECT_Style.cc"
 #include "vector"
 #include "DetectorConfig.h"
@@ -124,7 +124,7 @@ int BiPoDeadSeg_timingStudy()
     const double D = 145.7;
 
     // Initilizaing Data Structure
-    BPsim *bp = new BPsim();
+    BP *bp = new BP();
 
     TChain *ch = bp->chain;
 
@@ -218,6 +218,8 @@ int BiPoDeadSeg_timingStudy()
 
     int p_clust_counter = 0, f_clust_counter = 0, times_filled = 0;
     int corr_counter = 0, acc_counter = 0;
+    std::array<int, 154> nMinusCounter = {0};
+    std::array<int, 154> nPlusCounter = {0};
 
     // Beginning data reading loop
     int noEntries = ch->GetEntries();
@@ -356,9 +358,13 @@ int BiPoDeadSeg_timingStudy()
                     if (xposDir && !xnegDir)
                     {
                         hpx_count->Fill(D);
+                        nPlusCounter[beta_seg]++;
                     }
                     else if (!xposDir && xnegDir)
+                    {
                         hpx_count->Fill(-D);
+                        nMinusCounter[beta_seg]++;
+                    }
                     else if (xposDir && xnegDir)
                         hpx_count->Fill(0.0);
                     
@@ -529,19 +535,19 @@ int BiPoDeadSeg_timingStudy()
     double x1Err, x2Err, x3Err, x4Err, x5Err;
     double rPlusErr, rMinusErr;
 
-    np = hx->GetBinContent(5);
-    npp = hx_count->GetBinContent(1);
-    nm = hx->GetBinContent(297);
-    nmm = hx_count->GetBinContent(2);
+    np = hx->GetBinContent(297);
+    npp = hx_count->GetBinContent(3);
+    nm = hx->GetBinContent(5);
+    nmm = hx_count->GetBinContent(1);
     n0 = hx->GetBinContent(151);
-    npm = hx_count->GetBinContent(3);
+    npm = hx_count->GetBinContent(2);
 
-    npErr = hx->GetBinError(5);
-    nppErr = hx_count->GetBinError(1);
-    nmErr = hx->GetBinError(297);
-    nmmErr = hx_count->GetBinError(2);
+    npErr = hx->GetBinError(297);
+    nppErr = hx_count->GetBinError(3);
+    nmErr = hx->GetBinError(5);
+    nmmErr = hx_count->GetBinError(1);
     n0Err = hx->GetBinError(151);
-    npmErr = hx_count->GetBinError(3);
+    npmErr = hx_count->GetBinError(2);
     
     x1 = np;
     x2 = npp + npm;
@@ -575,19 +581,19 @@ int BiPoDeadSeg_timingStudy()
     cout << "N 0: " << n0 << "\n";
 
     // Doing y correction
-    np = hy->GetBinContent(5);
-    npp = hy_count->GetBinContent(1);
-    nm = hy->GetBinContent(297);
-    nmm = hy_count->GetBinContent(2);
+    np = hy->GetBinContent(297);
+    npp = hy_count->GetBinContent(3);
+    nm = hy->GetBinContent(5);
+    nmm = hy_count->GetBinContent(1);
     n0 = hy->GetBinContent(151);
-    npm = hy_count->GetBinContent(3);
+    npm = hy_count->GetBinContent(2);
 
-    npErr = hy->GetBinError(5);
-    nppErr = hy_count->GetBinError(1);
-    nmErr = hy->GetBinError(297);
-    nmmErr = hy_count->GetBinError(2);
+    npErr = hy->GetBinError(297);
+    nppErr = hy_count->GetBinError(3);
+    nmErr = hy->GetBinError(5);
+    nmmErr = hy_count->GetBinError(1);
     n0Err = hy->GetBinError(151);
-    npmErr = hy_count->GetBinError(3);
+    npmErr = hy_count->GetBinError(2);
     
     x1 = np;
     x2 = npp + npm;
@@ -619,6 +625,31 @@ int BiPoDeadSeg_timingStudy()
     cout << "N minus minus: " << nmm << "\n";
     cout << "N plus minus: " << npm << "\n";
     cout << "N 0: " << n0 << "\n";
+
+    int sum = 0;
+
+    for (int i = 0; i < nMinusCounter.size(); i++)
+    {
+        if (nMinusCounter[i])
+        {
+            //cout << "Number of n minus hits from segment " << i << " is: " << nMinusCounter[i] << "\n";
+            sum += nMinusCounter[i];
+        }
+    }
+
+    cout << "Total n minus hits: " << sum << "\n";
+    sum = 0;
+
+    for (int i = 0; i < nPlusCounter.size(); i++)
+    {
+        if (nPlusCounter[i])
+        {
+            //cout << "Number of n plus hits from segment " << i << " is: " << nPlusCounter[i] << "\n";
+            sum += nPlusCounter[i];
+        }
+    }
+
+    cout << "Total n plus hits: " << sum << "\n";
 
     TCanvas *c = new TCanvas("c", "c", 0, 0, 1600, 900);
     c->Divide(2, 1);
