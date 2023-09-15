@@ -11,6 +11,7 @@
         "iostream": "cpp",
         "*.inc": "cpp",
         "array": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "makeBiPoSimClassFromRunlist.C": "cpp"
     }
 }

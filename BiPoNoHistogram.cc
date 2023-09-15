@@ -16,6 +16,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TError.h"
+#include "TH1D.h"
 #include "BP.C"
 #include "PROSPECT_Style.cc"
 #include "vector"
@@ -52,11 +53,13 @@ void fillDetectorConfig(vector<int>& detectorConfig){
 
     cout << "Below is the detector configuration.\n";
 
-    for (int i = 0; i < detectorConfig.size(); i++) 
+    for (int i = 10; i >= 0; i--) 
     {  
-        cout << detectorConfig[i] << " ";
-        if ((i + 1) % 14 == 0)
-            cout << "\n";
+        for (int j = 0; j < 14; j++)
+        {
+            cout << detectorConfig[i * 14 + j] << " ";
+        }
+        cout << "\n";
     }
 }
 
@@ -139,6 +142,22 @@ int BiPoNoHistogram()
     int noEntries = ch->GetEntries();
 
     cout << "Number of entries: " << noEntries << "\n";
+
+    TH1D *hp_x = new TH1D("hp_x", "Alpha-Beta X Position Difference", 301, -150, 150);
+    hp_x->SetLineColor(kBlue);
+    hp_x->SetLineWidth(2);
+
+    TH1D *hp_y = new TH1D("hp_y", "Alpha-Beta Y Position Difference", 301, -150, 150);
+    hp_y->SetLineColor(kBlue);
+    hp_y->SetLineWidth(2);
+
+    TH1D *hf_x = new TH1D("hf_x", "Alpha-Beta X Position Difference (Accidental)", 301, -150, 150);
+    hf_x->SetLineColor(kRed);
+    hf_x->SetLineWidth(2);
+
+    TH1D *hf_y = new TH1D("hf_y", "Alpha-Beta Y Position Difference (Accidental)", 301, -150, 150);
+    hf_y->SetLineColor(kRed);
+    hf_y->SetLineWidth(2);
 
     for (int i = 0; i < noEntries; ++i)
     {
@@ -232,22 +251,25 @@ int BiPoNoHistogram()
 
             if (dt > t_start && dt < t_end)
             {
-
                 if (beta_seg == alpha_seg - 1)
                 {
                     correlated[0].at(0)++;
+                    hp_x->Fill(dx);
                 }
                 else if (beta_seg == alpha_seg + 1)
                 {
                     correlated[0].at(1)++;
+                    hp_x->Fill(dx);
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
                     correlated[1].at(0)++;
+                    hp_y->Fill(dy);
                 }
                 else if (beta_seg == alpha_seg + 14)
                 {
                     correlated[1].at(1)++;
+                    hp_y->Fill(dy);
                 }
                 
                 ++scale;
@@ -256,6 +278,9 @@ int BiPoNoHistogram()
 
                 if (beta_seg == alpha_seg)
                 {
+                    hp_x->Fill(dx);
+                    hp_y->Fill(dy);
+
                     correlated[0].at(2)++;
                     correlated[1].at(2)++;
 
@@ -353,22 +378,28 @@ int BiPoNoHistogram()
                 if (beta_seg == alpha_seg - 1)
                 {
                     accidental[0].at(0)++;
+                    hf_x->Fill(dx, n2f);
                 }
                 else if (beta_seg == alpha_seg + 1)
                 {
                     accidental[0].at(1)++;
+                    hf_x->Fill(dx, n2f);
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
                     accidental[1].at(0)++;
+                    hf_y->Fill(dy, n2f);
                 }
                 else if (beta_seg == alpha_seg + 14)
                 {
                     accidental[1].at(1)++;
+                    hf_y->Fill(dy, n2f);
                 }
 
                 if (beta_seg == alpha_seg)
                 {
+                    hf_x->Fill(dx, n2f);
+                    hf_y->Fill(dy, n2f);
                     accidental[0].at(2)++;
                     accidental[1].at(2)++;
 
@@ -535,6 +566,66 @@ int BiPoNoHistogram()
     mean = (-D * nm + D * np) / (np + n0 + nm);
 
     cout << "The regular Y mean is: " << mean << "\n";
+
+    TH1D *hx = (TH1D*)hp_x->Clone("hx");
+    hx->Add(hf_x, -1);
+    hx->SetLineColor(kMagenta);
+    hx->SetLineWidth(2);
+
+    TH1D *hy = (TH1D*)hp_y->Clone("hy");
+    hy->Add(hf_y, -1);
+    hy->SetLineColor(kMagenta);
+    hy->SetLineWidth(2);
+
+    cout << "According to the histogram, we have: " << hx->GetBinContent(1) << " counts for x n-\n";
+    cout << "According to the histogram, we have: " << hx->GetBinContent(2) << " counts for x n0\n";
+    cout << "According to the histogram, we have: " << hx->GetBinContent(3) << " counts for x n+\n";
+    cout << "According to the histogram, we have: " << hy->GetBinContent(1) << " counts for y n-\n";
+    cout << "According to the histogram, we have: " << hy->GetBinContent(2) << " counts for y n0\n";
+    cout << "According to the histogram, we have: " << hy->GetBinContent(3) << " counts for y n+\n";
+
+    TCanvas *c = new TCanvas("c", "c", 0, 0, 1600, 1000);
+    c->Divide(2, 1);
+
+    c->cd(1);
+
+    hx->Draw("hist");
+    hx->SetMinimum(0);
+    hx->SetMaximum(3500000);
+
+    hx->GetXaxis()->SetTitle("Beta/Alpha Displacement (mm)");
+    hx->GetYaxis()->SetTitle("Counts");
+    gPad->SetRightMargin(0.09);
+    gPad->SetLeftMargin(0.15);
+    gPad->SetBottomMargin(0.15);
+
+    c->cd(2);
+
+    hy->Draw("hist");
+    hy->SetMinimum(0);
+    hy->SetMaximum(3500000);
+
+    hy->GetXaxis()->SetTitle("Beta/Alpha Displacement (mm)");
+    hy->GetYaxis()->SetTitle("Counts");
+    gPad->SetRightMargin(0.09);
+    gPad->SetLeftMargin(0.15);
+    gPad->SetBottomMargin(0.15);
+    
+    TLegend *leg = new TLegend( x_legend, y_legend, x_legend + 0.25, y_legend + 0.08 );
+    leg->SetBorderSize(1);
+    leg->SetFillColor(0);
+    leg->SetFillStyle(0);
+    leg->SetTextFont(62);
+    leg->SetTextSize(0.02);
+    
+    TLegendEntry* l11 = leg->AddEntry( (TObject*)0, Form("X Mean = %.2f", hx->GetMean()), "" );
+    l11->SetTextColor(kBlack);
+    TLegendEntry* l12 = leg->AddEntry( (TObject*)0, Form("Y Mean = %.2f", hy->GetMean()), "" );
+    l12->SetTextColor(kBlack);
+
+    leg->Draw();
+
+    c->SaveAs("XY_FillDirectly.png");      
     
     return 0;
 }

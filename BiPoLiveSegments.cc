@@ -20,9 +20,11 @@ Branch names:
 . https://github.com/PROSPECT-collaboration/PROSPECT2x_Analysis/blob/master/Analysis/PhysPulse/IBDTree.hh 
 */
 
-#include "../../GeneralHeader.h"
-#include "../../Plotter.h"
-#include "BP.C"
+#include "GeneralHeader.h"
+#include "Plotter.h"
+#include "BPsim.C"
+
+using std::cout;
 
 void DrawPopulationMatrix(TH2D* h)
 {
@@ -101,7 +103,7 @@ int BiPoLiveSegments()
     const double tauBiPo = 0.1643/log(2);
 
     // Initilizaing Data Structure
-    BP *bp = new BP();
+    BPsim *bp = new BPsim();
 
     TChain *ch = bp->chain;
 
@@ -219,7 +221,7 @@ int BiPoLiveSegments()
     h_beta = (TH2D*)h_beta_cor->Clone("h_beta");
     h_beta->Add(h_beta_acc, -1);
 
-    TCanvas c1("Alpha1s", "alphas1", 1200, 1200);
+    TCanvas c1("Alpha1s", "alphas1", 1600, 1200);
     c1.cd()->SetGridx(true);
     c1.cd()->SetGridy(true);
 
@@ -228,7 +230,7 @@ int BiPoLiveSegments()
     AddHistoTitle("Alphas, Correlated", 0.05, 62);
     MultiPrint(&c1, print_topdir, "png");
     
-    TCanvas c2("Alphas2", "alphas2", 1200, 1200);
+    TCanvas c2("Alphas2", "alphas2", 1600, 1200);
     c2.cd()->SetGridx(true);
     c2.cd()->SetGridy(true);
 
@@ -237,16 +239,16 @@ int BiPoLiveSegments()
     AddHistoTitle("Alphas, Accidentals", 0.05, 62);
     MultiPrint(&c2, print_topdir, "png");
 
-    TCanvas c3("Alphas3", "alphas3", 1200, 1200);
+    TCanvas c3("Alphas3", "alphas3", 1600, 1200);
     c3.cd()->SetGridx(true);
     c3.cd()->SetGridy(true);
 
     ApplyAxisStyle(h_alpha);
     DrawPopulationMatrix(h_alpha);
-    AddHistoTitle("Alphas, Acc Subtracted", 0.05, 62);
+    AddHistoTitle("Sim Alphas, Acc Subtracted", 0.05, 62);
     MultiPrint(&c3, print_topdir, "png");
 
-    TCanvas c4("Betas1", "Betas1", 1200, 1200);
+    TCanvas c4("Betas1", "Betas1", 1600, 1200);
     c4.cd()->SetGridx(true);
     c4.cd()->SetGridy(true);
 
@@ -255,7 +257,7 @@ int BiPoLiveSegments()
     AddHistoTitle("Betas, Correlated", 0.05, 62);
     MultiPrint(&c4, print_topdir, "png");
 
-    TCanvas c5("Betas2", "Betas2", 1200, 1200);
+    TCanvas c5("Betas2", "Betas2", 1600, 1200);
     c5.cd()->SetGridx(true);
     c5.cd()->SetGridy(true);
 
@@ -264,13 +266,13 @@ int BiPoLiveSegments()
     AddHistoTitle("Betas, Accidentals", 0.05, 62);
     MultiPrint(&c5, print_topdir, "png");
 
-    TCanvas c6("Betas3", "Betas3", 1200, 1200);
+    TCanvas c6("Betas3", "Betas3", 1600, 1200);
     c6.cd()->SetGridx(true);
     c6.cd()->SetGridy(true);
 
     ApplyAxisStyle(h_beta);
     DrawPopulationMatrix(h_beta);
-    AddHistoTitle("Betas, Acc Subtracted", 0.05, 62);
+    AddHistoTitle("Sim Betas, Acc Subtracted", 0.05, 62);
     MultiPrint(&c6, print_topdir, "png");
 
     return 0;

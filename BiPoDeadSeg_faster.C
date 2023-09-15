@@ -351,6 +351,8 @@ int main()
                                         diff_index = 4.0;
                                     else if (posDir && negDir)
                                         diff_index = 5.0;
+                                    
+                                    h_data_cor_off[ivar]->Fill(6.0);
                                 }
                             }
 
@@ -456,6 +458,8 @@ int main()
                                         diff_index = 4.0;
                                     else if (posDir && negDir)
                                         diff_index = 5.0;
+                                    
+                                    h_data_acc_off[ivar]->Fill(6.0, n2f);
                                 }
                             }
 

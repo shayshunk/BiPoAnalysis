@@ -24,7 +24,7 @@
 #include "THStack.h"
 #include "TPaveText.h"
 #include "TPaveStats.h"
-#include "BP.C"
+#include "BPsim.C"
 #include "PROSPECT_Style.cc"
 #include "vector"
 #include "DetectorConfig.h"
@@ -59,11 +59,13 @@ void fillDetectorConfig(vector<int>& detectorConfig){
 
     cout << "Below is the detector configuration.\n";
 
-    for (int i = 0; i < detectorConfig.size(); i++) 
+    for (int i = 10; i >= 0; i--) 
     {  
-        cout << detectorConfig[i] << " ";
-        if ((i + 1) % 14 == 0)
-            cout << "\n";
+        for (int j = 0; j < 14; j++)
+        {
+            cout << detectorConfig[i * 14 + j] << " ";
+        }
+        cout << "\n";
     }
 }
 
@@ -119,9 +121,10 @@ int BiPoDeadSeg_timingStudy()
     // Defining useful physical constants
     const double n2f = 1/12.0;
     const double tauBiPo = 0.1643/log(2);
+    const double D = 145.7;
 
     // Initilizaing Data Structure
-    BP *bp = new BP();
+    BPsim *bp = new BPsim();
 
     TChain *ch = bp->chain;
 
@@ -129,15 +132,15 @@ int BiPoDeadSeg_timingStudy()
     gStyle->SetOptStat(0);
     gStyle->SetOptFit(1111);
 
-    TH1D *hp_x = new TH1D("hp_x", "Alpha-Beta X Position Difference", 301, -150, 150);
+    TH1D *hp_x = new TH1D("hp_x", "X Position Difference", 301, -150, 150);
     hp_x->SetLineColor(kBlue);
     hp_x->SetLineWidth(2);
 
-    TH1D *hp_y = new TH1D("hp_y", "Alpha-Beta Y Position Difference", 301, -150, 150);
+    TH1D *hp_y = new TH1D("hp_y", "Y Position Difference", 301, -150, 150);
     hp_y->SetLineColor(kBlue);
     hp_y->SetLineWidth(2);
 
-    TH1D *hp_z = new TH1D("hp_z", "Alpha-Beta Z Position Difference", 501, -250, 250);
+    TH1D *hp_z = new TH1D("hp_z", "Z Position Difference", 501, -250, 250);
     hp_z->SetLineColor(kBlue);
     hp_z->SetLineWidth(2);
     hp_z->Sumw2();
@@ -155,15 +158,15 @@ int BiPoDeadSeg_timingStudy()
     hf_z->SetLineWidth(2);
     hf_z->Sumw2();
 
-    TH1D *hx = new TH1D("hx", "Alpha-Beta X Position Difference (Acc Subtr)", 301, -150, 150);
+    TH1D *hx = new TH1D("hx", "X Position Difference", 301, -150, 150);
     hx->SetLineColor(kMagenta);
     hx->SetLineWidth(2);
 
-    TH1D *hy = new TH1D("hy", "Alpha-Beta Y Position Difference (Acc Subtr)", 301, -150, 150);
+    TH1D *hy = new TH1D("hy", "Y Position Difference", 301, -150, 150);
     hy->SetLineColor(kMagenta);
     hy->SetLineWidth(2);
 
-    TH1D *hz = new TH1D("hz", "Alpha-Beta Z Position Difference (Acc Subtr)", 501, -250, 250);
+    TH1D *hz = new TH1D("hz", "Z Position Difference", 501, -250, 250);
     hz->SetLineColor(kMagenta);
     hz->SetLineWidth(2);
 
@@ -256,7 +259,7 @@ int BiPoDeadSeg_timingStudy()
         }
 
         int alpha_seg = bp->aseg;
-        if (alpha_seg >= 140 || alpha_seg < 77 || alpha_seg % 14 == 0 || (alpha_seg + 1) % 14 == 0 || alpha_seg == 25 || alpha_seg == 26)
+        if (alpha_seg >= 140 || alpha_seg % 14 == 0 || (alpha_seg + 1) % 14 == 0 || alpha_seg == 25 || alpha_seg == 26)
         {
             continue;
         }
@@ -266,7 +269,7 @@ int BiPoDeadSeg_timingStudy()
         for (int j = 0; j < multPrompt; ++j)
         {
             int beta_seg = bp->pseg->at(j);
-            if (beta_seg >= 140 || beta_seg < 77 || beta_seg % 14 == 0 || (beta_seg + 1) % 14 == 0 || beta_seg == 25 || beta_seg == 26)
+            if (beta_seg >= 140 || beta_seg % 14 == 0 || (beta_seg + 1) % 14 == 0 || beta_seg == 25 || beta_seg == 26)
             {
                 continue;
             }
@@ -294,8 +297,8 @@ int BiPoDeadSeg_timingStudy()
                 continue;
             }
 
-            double dx = 145.7 * (alphaX - betaX);
-            double dy = 145.7 * (alphaY - betaY);
+            double dx = D * (alphaX - betaX);
+            double dy = D * (alphaY - betaY);
             double dz = alphaZ - betaZ;
 
             double d = sqrt(dx*dx + dy*dy + dz*dz);
@@ -316,24 +319,19 @@ int BiPoDeadSeg_timingStudy()
 
                 if (beta_seg == alpha_seg + 1)
                 {
-                    hp_x->Fill(-145.0);
+                    hp_x->Fill(-D);
                 }
                 if (beta_seg == alpha_seg - 1)
                 {
-                    hp_x->Fill(145.0);
+                    hp_x->Fill(D);
                 }
                 if (beta_seg == alpha_seg + 14)
                 {
-                    hp_y->Fill(-145.0);
+                    hp_y->Fill(-D);
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
-                    hp_y->Fill(145.0);
-                }
-                if (beta_seg == alpha_seg)
-                {
-                    hp_x->Fill(0);
-                    hp_y->Fill(0);
+                    hp_y->Fill(D);
                 }
                 
                 ++scale;
@@ -344,6 +342,9 @@ int BiPoDeadSeg_timingStudy()
 
                 if (bp->aseg == bp->pseg->at(j))
                 {
+                    hp_x->Fill(0.0);
+                    hp_y->Fill(0.0);
+
                     bool xposDir = false, xnegDir = false;
                     bool yposDir = false, ynegDir = false;
 
@@ -354,18 +355,18 @@ int BiPoDeadSeg_timingStudy()
 
                     if (xposDir && !xnegDir)
                     {
-                        hpx_count->Fill(145.0);
+                        hpx_count->Fill(D);
                     }
                     else if (!xposDir && xnegDir)
-                        hpx_count->Fill(-145.0);
+                        hpx_count->Fill(-D);
                     else if (xposDir && xnegDir)
                         hpx_count->Fill(0.0);
                     
                     if (yposDir && !ynegDir)
-                        hpy_count->Fill(145.0);
+                        hpy_count->Fill(D);
                     else if (!yposDir && ynegDir)
                     {
-                        hpy_count->Fill(-145.0);
+                        hpy_count->Fill(-D);
                     }
                     else if (yposDir && ynegDir)
                         hpy_count->Fill(0.0);
@@ -417,8 +418,8 @@ int BiPoDeadSeg_timingStudy()
             int betaX = bp->fseg->at(j) % 14;
             int betaY = bp->fseg->at(j) / 14;
 
-            double dx = 145.7 * (alphaX - betaX);
-            double dy = 145.7 * (alphaY - betaY);
+            double dx = D * (alphaX - betaX);
+            double dy = D * (alphaY - betaY);
             double dz = alphaZ - betaZ;
 
             double d = sqrt(dx*dx + dy*dy + dz*dz);
@@ -440,28 +441,26 @@ int BiPoDeadSeg_timingStudy()
 
                 if (beta_seg == alpha_seg + 1)
                 {
-                    hf_x->Fill(-145.0, n2f);
+                    hf_x->Fill(-D, n2f);
                 }
                 if (beta_seg == alpha_seg - 1)
                 {
-                    hf_x->Fill(145.0, n2f);
+                    hf_x->Fill(D, n2f);
                 }
                 if (beta_seg == alpha_seg + 14)
                 {
-                    hf_y->Fill(-145.0, n2f);
+                    hf_y->Fill(-D, n2f);
                 }
                 if (beta_seg == alpha_seg - 14)
                 {
-                    hf_y->Fill(145.0, n2f);
-                }
-                if (beta_seg == alpha_seg)
-                {
-                    hf_x->Fill(0);
-                    hf_y->Fill(0);
+                    hf_y->Fill(D, n2f);
                 }
 
-                if (bp->aseg == bp->fseg->at(j))
+                if (beta_seg == alpha_seg)
                 {
+                    hf_x->Fill(0.0, n2f);
+                    hf_y->Fill(0.0, n2f);
+
                     bool xposDir = false, xnegDir = false;
                     bool yposDir = false, ynegDir = false;
 
@@ -472,18 +471,18 @@ int BiPoDeadSeg_timingStudy()
 
                     if (xposDir && !xnegDir)
                     {
-                        hfx_count->Fill(145.0, n2f);
+                        hfx_count->Fill(D, n2f);
                     }
                     else if (!xposDir && xnegDir)
-                        hfx_count->Fill(-145.0, n2f);
+                        hfx_count->Fill(-D, n2f);
                     else if (xposDir && xnegDir)
                         hfx_count->Fill(0.0, n2f);
                     
                     if (yposDir && !ynegDir)
-                        hfy_count->Fill(145.0, n2f);
+                        hfy_count->Fill(D, n2f);
                     else if (!yposDir && ynegDir)
                     {
-                        hfy_count->Fill(-145.0, n2f);
+                        hfy_count->Fill(-D, n2f);
                     }
                     else if (yposDir && ynegDir)
                         hfy_count->Fill(0.0, n2f);
@@ -502,7 +501,7 @@ int BiPoDeadSeg_timingStudy()
 
     double x_legend = 0.6;
     double y_legend = 0.77;
-
+ new TH1D("hx", "X Position Difference", 301, -150, 150);
     hx = (TH1D*)hp_x->Clone("hx");
     hx->Add(hf_x, -1);
 
@@ -523,26 +522,26 @@ int BiPoDeadSeg_timingStudy()
 
     // Doing x correction
 
-    double rPlus, rMinus, px, pxErr, py, pyErr, D = 145.7;
+    double rPlus, rMinus, px, pxErr, py, pyErr;
     double np, npp, npm, nm, nmm, n0;
     double x1, x2, x3, x4, x5;
     double npErr, nppErr, npmErr, nmErr, nmmErr, n0Err;
     double x1Err, x2Err, x3Err, x4Err, x5Err;
     double rPlusErr, rMinusErr;
 
-    np = hx->GetBinContent(3);
-    npp = hx_count->GetBinContent(3);
-    nm = hx->GetBinContent(1);
-    nmm = hx_count->GetBinContent(1);
-    n0 = hx->GetBinContent(2);
-    npm = hx_count->GetBinContent(2);
+    np = hx->GetBinContent(5);
+    npp = hx_count->GetBinContent(1);
+    nm = hx->GetBinContent(297);
+    nmm = hx_count->GetBinContent(2);
+    n0 = hx->GetBinContent(151);
+    npm = hx_count->GetBinContent(3);
 
-    npErr = hx->GetBinError(3);
-    nppErr = hx_count->GetBinError(3);
-    nmErr = hx->GetBinError(1);
-    nmmErr = hx_count->GetBinError(1);
-    n0Err = hx->GetBinError(2);
-    npmErr = hx_count->GetBinError(2);
+    npErr = hx->GetBinError(5);
+    nppErr = hx_count->GetBinError(1);
+    nmErr = hx->GetBinError(297);
+    nmmErr = hx_count->GetBinError(2);
+    n0Err = hx->GetBinError(151);
+    npmErr = hx_count->GetBinError(3);
     
     x1 = np;
     x2 = npp + npm;
@@ -576,19 +575,19 @@ int BiPoDeadSeg_timingStudy()
     cout << "N 0: " << n0 << "\n";
 
     // Doing y correction
-    np = hy->GetBinContent(3);
-    npp = hy_count->GetBinContent(3);
-    nm = hy->GetBinContent(1);
-    nmm = hy_count->GetBinContent(1);
-    n0 = hy->GetBinContent(2);
-    npm = hy_count->GetBinContent(2);
+    np = hy->GetBinContent(5);
+    npp = hy_count->GetBinContent(1);
+    nm = hy->GetBinContent(297);
+    nmm = hy_count->GetBinContent(2);
+    n0 = hy->GetBinContent(151);
+    npm = hy_count->GetBinContent(3);
 
-    npErr = hy->GetBinError(3);
-    nppErr = hy_count->GetBinError(3);
-    nmErr = hy->GetBinError(1);
-    nmmErr = hy_count->GetBinError(1);
-    n0Err = hy->GetBinError(2);
-    npmErr = hy_count->GetBinError(2);
+    npErr = hy->GetBinError(5);
+    nppErr = hy_count->GetBinError(1);
+    nmErr = hy->GetBinError(297);
+    nmmErr = hy_count->GetBinError(2);
+    n0Err = hy->GetBinError(151);
+    npmErr = hy_count->GetBinError(3);
     
     x1 = np;
     x2 = npp + npm;
@@ -621,7 +620,7 @@ int BiPoDeadSeg_timingStudy()
     cout << "N plus minus: " << npm << "\n";
     cout << "N 0: " << n0 << "\n";
 
-    TCanvas *c = new TCanvas("c", "c", 0, 0, 1600, 1000);
+    TCanvas *c = new TCanvas("c", "c", 0, 0, 1600, 900);
     c->Divide(2, 1);
 
     c->cd(1);
@@ -664,9 +663,9 @@ int BiPoDeadSeg_timingStudy()
 
     leg->Draw();
 
-    c->SaveAs("X_AlphaBeta_RxOn.png");        
+    c->SaveAs("X_AlphaBeta_RxOff.png");        
 
-    TCanvas *c1 = new TCanvas("c1", "c1", 0, 0, 1600, 1000);
+    TCanvas *c1 = new TCanvas("c1", "c1", 0, 0, 1600, 900);
     c1->Divide(2, 1);
 
     c1->cd(1);
@@ -707,9 +706,9 @@ int BiPoDeadSeg_timingStudy()
 
     leg1->Draw();
 
-    c1->SaveAs("Y_AlphaBeta_RxOn.png");           
+    c1->SaveAs("Y_AlphaBeta_RxOff.png");           
 
-    TCanvas *c2 = new TCanvas("c2", "c2", 0, 0, 1600, 1000);
+    TCanvas *c2 = new TCanvas("c2", "c2", 0, 0, 1600, 900);
     c2->Divide(2, 1);
 
     c2->cd(1);
@@ -745,9 +744,9 @@ int BiPoDeadSeg_timingStudy()
 
     leg2->Draw();        
 
-    c2->SaveAs("Z_Alpha_RxOn.png");
+    c2->SaveAs("Z_Alpha_RxOff.png");
 
-    TCanvas *c3 = new TCanvas("c3", "c3", 0, 0, 1600, 1000);
+    TCanvas *c3 = new TCanvas("c3", "c3", 0, 0, 1600, 900);
     c3->Divide(2, 1);
 
     c3->cd(1);
@@ -783,7 +782,7 @@ int BiPoDeadSeg_timingStudy()
 
     leg3->Draw();        
 
-    c3->SaveAs("Z_AlphaBeta_RxOn.png");    
+    c3->SaveAs("Z_AlphaBeta_RxOff.png");    
 
     return 0;
 }

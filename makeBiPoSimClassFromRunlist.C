@@ -1,12 +1,15 @@
+#include "TString.h"
 #include "TChain.h"
 #include "TSystem.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
 
-using std::string;
 using std::cout;
+using std::string;
 
-int makeBiPoClassFromRunlist(const char *fname="2019Xlist_RxOff.txt", const char* TFilename = "AD1_BiPo.root", const char* release = "Analyzed_2020A"){
+int makeBiPoSimClassFromRunlist(const char *fname="2019Xlist_RxOff.txt", const char* TFilename = "AD1_BiPo.root", const char* release = "Sims"){
   std::ifstream file;
   file.open(fname, std::ifstream::in);
   if(!(file.is_open()&&file.good())){
@@ -15,10 +18,13 @@ int makeBiPoClassFromRunlist(const char *fname="2019Xlist_RxOff.txt", const char
   }
   TChain *ch = new TChain("BiPoTreePlugin/BiPo");
   while(file.good()&!file.eof()){
-    string line;
+    string line, fname;
     getline(file, line);
-    TString st = Form("%s/%s/%s/%s",gSystem->Getenv("BIPO_OUTDIR"), release, line.data(), TFilename);
-    //printf("%s", st.Data());
+    stringstream ss(line);
+    TString st;
+    while(getline(ss, fname,'/'))
+      st = Form("%s/%s/%s/%s",gSystem->Getenv("BIPO_OUTDIR"), release, fname.data(), TFilename);
+    //printf("%s\n", st.Data());
     ch->Add(st.Data());
     file.peek();
   }
@@ -27,7 +33,7 @@ int makeBiPoClassFromRunlist(const char *fname="2019Xlist_RxOff.txt", const char
   int nmissing = nadded - ch->GetListOfFiles()->GetEntries();
   cout<<"Attempted to add "<<nadded<<" files from good runs list to TChain\n";
   cout<<"Removed "<<nmissing<<" missing files from TChain for total of "<<nadded-nmissing<<" files in TChain \n";
-  ch->MakeClass("BP");
-  gSystem->Exec("./editBiPoClass.sh");
+  ch->MakeClass("BPsim");
+  gSystem->Exec("./editBiPoSimClass.sh");
   return 0;
 }
